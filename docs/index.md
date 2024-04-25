@@ -1,15 +1,15 @@
-# 服务模版说明文档
+# 服务模板说明文档
 
 ## 服务说明
 
-本文介绍springboot服务ack+docker版快速上手流程，本示例对应的[git地址](https://github.com/aliyun-computenest/springboot-ack-docker-demo)
+本文介绍SpringBoot服务ack+docker版快速上手流程，本示例对应的Git仓库地址：[springboot-ack-docker-demo](https://github.com/aliyun-computenest/springboot-ack-docker-demo)。
 
 本示例会自动的构建计算巢服务，具体的服务构建流程为:
 
 1. 构建并上传docker镜像，创建计算巢容器镜像部署物
 2. 创建计算巢服务并关联容器镜像部署物
 
-创建过程大约持续1分钟，当服务变成待提交后构建成功
+创建过程大约持续1分钟，当服务变成待提交后构建成功。
 
 ## 服务架构
 
@@ -19,11 +19,11 @@
 
 ## 服务构建计费说明
 
-测试本服务构建无需任何费用，创建服务实例涉及的费用参考服务实例计费说明
+测试本服务构建无需任何费用，创建服务实例涉及的费用参考服务实例计费说明。
 
 ## RAM账号所需权限
 
-本服务需要对ACK、ECS、VPC等资源进行访问和创建操作，若您使用RAM用户创建服务实例，需要在创建服务实例前，对使用的RAM用户的账号添加相应资源的权限。添加RAM权限的详细操作，请参见[为RAM用户授权](https://help.aliyun.com/document_detail/121945.html)。所需权限如下表所示。
+本服务需要对ACK、ECS、VPC等资源进行访问和创建操作，若您使用RAM用户创建服务实例，需要在创建服务实例前，对使用的RAM用户的账号添加相应资源的权限。添加RAM权限的详细操作，请参见[为RAM用户授权](https://help.aliyun.com/document_detail/121945.html)。所需权限如下表所示：
 
 | 权限策略名称                          | 备注              |
 |---------------------------------|-----------------|
@@ -62,21 +62,21 @@
 
 ### 部署参数说明
 
-| 参数组          | 参数项               | 说明                                                                     |
-|--------------|-------------------|------------------------------------------------------------------------|
-| 服务实例         | 服务实例名称            | 长度不超过64个字符，必须以英文字母开头，可包含数字、英文字母、短划线（-）和下划线（_）                          |
-|              | 地域                | 服务实例部署的地域                                                              |
-| 付费类型配置       | 付费类型              | 资源的计费类型：按量付费和包年包月                                                      |
-| 基础配置         | 可用区               | ACK集群所在可用区                                                             |
-|              | 专有网络IPv4网段        | VPC的ip地址段范围，创建VPC时使用                                                   |
-|              | 交换机子网网段           | VSwitch的ip地址段范围，必须是VPC网段的子网段                                           |
-|              | 实例密码              | 长度8-30，必须包含三项（大写字母、小写字母、数字、 ()`~!@#$%^&*-+=&#124;{}[]:;'<>,.?/ 中的特殊符号） |
-| Kubernetes配置 | Worker节点规格        | ACK集群中节点使用的实例规格                                                        |
-|              | Worker 系统盘磁盘类型    | ACK集群中节点使用的系统盘磁盘类型                                                     |
-|              | Worker节点系统盘大小(GB) | ACK集群中节点使用的系统盘磁盘大小                                                     |
-|              | Service CIDR      | ACK集群中service可用网段，不能与 VPC 及 VPC 内已有 Kubernetes 集群使用的网段重复               |
-|              | Pod 网络 CIDR       | ACK集群中pod可用网段，不能与 VPC 及 VPC 内已有 Kubernetes 集群使用的网段重复                   |
-| 负载均衡配置       | 规格                | 负载均衡规格                                                                 |
+| 参数组          | 参数项               | 说明                                                                      |
+|--------------|-------------------|-------------------------------------------------------------------------|
+| 服务实例         | 服务实例名称            | 长度不超过64个字符，必须以英文字母开头，可包含数字、英文字母、短划线（-）和下划线（_）。                          |
+|              | 地域                | 服务实例部署的地域。                                                              |
+| 付费类型配置       | 付费类型              | 资源的计费类型：按量付费和包年包月。                                                      |
+| 基础配置         | 可用区               | ACK集群所在可用区。                                                             |
+|              | 专有网络IPv4网段        | VPC的ip地址段范围，创建VPC时使用。                                                   |
+|              | 交换机子网网段           | VSwitch的ip地址段范围，必须是VPC网段的子网段。                                           |
+|              | 实例密码              | 长度8-30，必须包含三项（大写字母、小写字母、数字、 ()`~!@#$%^&*-+=&#124;{}[]:;'<>,.?/ 中的特殊符号）。 |
+| Kubernetes配置 | Worker节点规格        | ACK集群中节点使用的实例规格。                                                        |
+|              | Worker 系统盘磁盘类型    | ACK集群中节点使用的系统盘磁盘类型。                                                     |
+|              | Worker节点系统盘大小(GB) | ACK集群中节点使用的系统盘磁盘大小。                                                     |
+|              | Service CIDR      | ACK集群中service可用网段，不能与 VPC 及 VPC 内已有 Kubernetes 集群使用的网段重复。               |
+|              | Pod 网络 CIDR       | ACK集群中pod可用网段，不能与 VPC 及 VPC 内已有 Kubernetes 集群使用的网段重复。                   |
+| 负载均衡配置       | 规格                | 负载均衡规格。                                                                 |
 
 ### 部署步骤
 
@@ -86,8 +86,7 @@
 ![img_1.png](img_1.png)
 2. 参数填写完成后可以看到对应询价明细，确认参数后点击**下一步：确认订单**。
 ![img_2.png](img_2.png)
-3.  确认订单完成后同意服务协议并点击**立即创建**
-    进入部署阶段。
+3.  确认订单完成后同意服务协议并点击**立即创建**，随后进入部署阶段。
 ![img_3.png](img_3.png)
 4. 等待部署完成后就可以开始使用服务，进入服务实例详情点击visitUrl。
 ![img_4.png](img_4.png)
@@ -97,7 +96,7 @@
 
 ## 服务详细说明
 
-本文通过将[代码](https://atomgit.com/flow-example/spring-boot)构建后，将deploy.sh和application.jar打包成package.tgz,对其中的application.jar打包成docker镜像,
+本文通过将[spring-boot](https://atomgit.com/flow-example/spring-boot)构建后，将deploy.sh和application.jar打包成package.tgz,对其中的application.jar打包成docker镜像,
 通过计算巢部署物上传为容器镜像部署物，在模版中创建ACK集群，将容器镜像部署物部署到ACK集群上。
 
 package.tgz打包为docker镜像对应的Dockerfile如下：
@@ -130,9 +129,9 @@ EXPOSE 8080
 CMD ["java", "-jar", "application.jar"]
 ```
 
-templates/template.yaml主要由三部分组成
+templates/template.yaml主要由三部分组成：Parameters、Resources和Outputs
 
-1.Parameters定义需要用户填写的参数，包括付费类型，ACK实例规格和实例密码可用区等参数
+1.Parameters，定义需要用户填写的参数，包括付费类型，ACK实例规格和实例密码可用区等参数。
 ```
 Parameters:
   PayType:
@@ -521,7 +520,7 @@ Resources:
       DefaultNamespace: default
 ```
 
-3.Outputs定义需要最终在计算巢概览页中对用户展示的输出，展示springboot的访问地址，负载均衡地址加服务端口
+3.Outputs定义需要最终在计算巢概览页中对用户展示的输出，展示SpringBoot的访问地址，负载均衡地址加服务端口。
 ```
 Outputs:
   # 将公网ip做为http返回的地址显示在控制台
