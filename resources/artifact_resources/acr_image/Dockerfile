@@ -13,7 +13,7 @@ RUN yum update -y && \
     cd /root && \
     git clone https://github.com/aliyun-computenest/springboot-ack-docker-demo.git && \
     mkdir -p /home/admin/application && \
-    cp /root/springboot-ack-docker-demo/artifacts/package.tgz /home/admin/application && \
+    cp /root/springboot-ack-docker-demo/resources/artifact_resources/file/package.tgz /home/admin/application && \
     cd /home/admin/application && \
     tar xvf package.tgz && \
     rm -rf /root/springboot-ack-docker-demo && \
