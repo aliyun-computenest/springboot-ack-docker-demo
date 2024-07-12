@@ -15,7 +15,7 @@
 
 本部署架构为ack集群部署，将docker镜像以service的方式部署到ack集群中，通过service绑定的loadBalancer的公网ip进行访问，在本例中，service提供的对外端口为8080，和容器对外提供的端口相同。
 
-![img_6.png](img_6.png)
+![img_6.png](architecture.png)
 
 ## 服务构建计费说明
 
@@ -81,7 +81,7 @@
 ### 部署步骤
 
 0. 部署链接
-![img.png](img.png)
+![img.png](img_6.png)
 1. 单击部署链接，进入服务实例部署界面，根据界面提示，填写参数完成部署。
 ![img_1.png](img_1.png)
 2. 参数填写完成后可以看到对应询价明细，确认参数后点击**下一步：确认订单**。
