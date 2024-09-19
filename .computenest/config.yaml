@@ -12,6 +12,7 @@ Service:
     TemplateConfigs:
       - Name: 新建ack部署docker模版
         Url: 'ros_templates/template.yaml'
+        ArchitectureDiagramUrl: 'docs/architecture.png'
         AllowedRegions: []
   ServiceType: private
   ServiceInfo:
