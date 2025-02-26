@@ -32,7 +32,7 @@ Artifact:
       Tag: ${AcrImageBuilder.AcrImage_1.Tag}
 AcrImageBuilder:
   AcrImage_1:
-    DockerFilePath: 'resources/artifact_resources/acr_image/Dockerfile'
+    DockerFilePath: '.computenest/resources/artifact_resources/acr_image/Dockerfile'
     RepoName: spring-boot-demo
     Tag: v1.0
 
