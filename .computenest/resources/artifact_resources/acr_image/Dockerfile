@@ -1,4 +1,4 @@
-FROM centos
+FROM centos:7
 
 # 更新yum源地址
 RUN cd /etc/yum.repos.d/ && \
