@@ -10,16 +10,16 @@ Service:
           ArtifactId: ${Artifact.Artifact_1.ArtifactId}
           ArtifactVersion: ${Artifact.Artifact_1.ArtifactVersion}
     TemplateConfigs:
-      - Name: 新建ack部署docker模版
+      - Name: 容器集群部署yaml模版
         Url: 'ros_templates/template.yaml'
         ArchitectureDiagramUrl: 'docs/architecture.png'
         AllowedRegions: []
   ServiceType: private
   ServiceInfo:
     Locale: zh-CN
-    ShortDescription: spring boot demo，新建ack集群，并以docker的方式部署spring boot应用
+    ShortDescription: spring boot demo，在容器集群上以yaml的方式部署spring boot应用
     Image: 'resources/icons/service_logo.png'
-    Name: SpringBoot服务示例(ack+docker版本)
+    Name: SpringBoot服务示例(容器集群+yaml版本)
   ShareType: Public
   ApprovalType: Manual
 Artifact:
@@ -30,6 +30,7 @@ Artifact:
     ArtifactProperty:
       RepoName: ${AcrImageBuilder.AcrImage_1.RepoName}
       Tag: ${AcrImageBuilder.AcrImage_1.Tag}
+      RepoType: Public
 AcrImageBuilder:
   AcrImage_1:
     DockerFilePath: '.computenest/resources/artifact_resources/acr_image/Dockerfile'

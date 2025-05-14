@@ -1,8 +1,49 @@
 ROSTemplateFormatVersion: '2015-09-01'
 Description:
-  en: 新建ack部署
-  zh-cn: new ack
+  en: 使用Yaml进行应用部署,同时支持Ack、Acs集群
+  zh-cn: Use Yaml for application deployment, and support Ack and Acs clusters
 Parameters:
+  CsOptions:
+    Type: String
+    AllowedValues:
+      - ExistCs
+      - NewAck
+      - NewAcs
+    AssociationPropertyMetadata:
+      ValueLabelMapping:
+        ExistCs:
+          zh-cn: 已有集群
+          en: Existing Cluster
+        NewAck:
+          zh-cn: 新建ACK集群
+          en: New ACK
+        NewAcs:
+          zh-cn: 新建ACS集群
+          en: New ACS
+    Label:
+      en: Cluster Option
+      zh-cn: 集群选项
+    Required: true
+    Default: ExistCs
+  ClusterId:
+    Type: String
+    Description:
+      en: The ID of Kubernetes ClusterId in which application deployed.
+      zh-cn: 部署应用程序的K8s集群ID
+    AllowedPattern: '[0-9a-z]+$'
+    Required: true
+    Default: null
+    Label:
+      en: Kubernetes ClusterId
+      zh-cn: K8s集群ID
+    AssociationProperty: 'ALIYUN::CS::Cluster::ClusterId'
+    AssociationPropertyMetadata:
+      RegionId: '${RegionId}'
+      Visible:
+        Condition:
+          Fn::Equals:
+            - ${CsOptions}
+            - ExistCs
   PayType:
     Type: String
     Label:
@@ -15,6 +56,11 @@ Parameters:
     AssociationProperty: ChargeType
     AssociationPropertyMetadata:
       LocaleKey: InstanceChargeType
+      Visible:
+        Condition:
+          Fn::Equals:
+            - ${CsOptions}
+            - NewAck
   PayPeriodUnit:
     Type: String
     Label:
@@ -28,20 +74,19 @@ Parameters:
     AssociationPropertyMetadata:
       Visible:
         Condition:
-          'Fn::Not':
-            'Fn::Equals':
-              - '${PayType}'
-              - PostPaid
+          Fn::And:
+            - Fn::Equals:
+                - ${CsOptions}
+                - NewAck
+            - Fn::Not:
+                Fn::Equals:
+                  - ${PayType}
+                  - PostPaid
   PayPeriod:
     Type: Number
     Description:
-      en: >-
-        When the resource purchase duration is Month, the value of Period ranges
-        from 1 to 9, 12, 24, 36, 48, or 60. <br><b><font color='red'> When ECS
-        instance types are PrePaid valid </b></font>
-      zh-cn: >-
-        当购买资源时长为Month时，Period取值：1~9 <br><b><font
-        color='red'>当ECS实例类型为PrePaid有效</b></font>
+      en: When the resource purchase duration is Month, the value of Period ranges from 1 to 9, 12, 24, 36, 48, or 60. <br><b><font color='red'> When ECS instance types are PrePaid valid </b></font>
+      zh-cn: 当购买资源时长为Month时，Period取值：1~9 <br><b><font color='red'>当ECS实例类型为PrePaid有效</b></font>
     Label:
       en: Period
       zh-cn: 购买资源时长
@@ -60,36 +105,126 @@ Parameters:
     AssociationPropertyMetadata:
       Visible:
         Condition:
-          'Fn::Not':
-            'Fn::Equals':
-              - '${PayType}'
-              - PostPaid
+          Fn::And:
+            - Fn::Equals:
+                - ${CsOptions}
+                - NewAck
+            - Fn::Not:
+                Fn::Equals:
+                  - ${PayType}
+                  - PostPaid
   ZoneId:
     Type: String
-    AssociationProperty: 'ALIYUN::ECS::Instance:ZoneId'
+    AssociationProperty: ALIYUN::ECS::Instance:ZoneId
     Label:
       en: Zone ID
       zh-cn: 可用区
-    Default: cn-hangzhou-h
+    Required: true
+    Default: null
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          Fn::Not:
+            Fn::Equals:
+              - ${CsOptions}
+              - ExistCs
+  VpcOption:
+    Type: String
+    AllowedValues:
+      - NewVPC
+      - ExistingVPC
+    AssociationPropertyMetadata:
+      ValueLabelMapping:
+        NewVPC:
+          zh-cn: 新建专有网络
+          en: New VPC
+        ExistingVPC:
+          zh-cn: 已有专有网络
+          en: Existing VPC
+      Visible:
+        Condition:
+          Fn::Not:
+            Fn::Equals:
+              - ${CsOptions}
+              - ExistCs
+    Label:
+      en: Select Existing or New VPC
+      zh-cn: 选择已有/新建的专有网络
+    Required: true
+    Default: NewVPC
+  VpcId:
+    Type: String
+    Label:
+      en: VPC ID
+      zh-cn: 专有网络VPC实例ID
+    Description:
+      en: >-
+        Please search the ID starting with (vpc-xxx) from console-Virtual
+        Private Cloud
+      zh-cn: 现有虚拟专有网络的实例ID
+    Required: true
+    Default: null
+    AssociationProperty: 'ALIYUN::ECS::VPC::VPCId'
+    AssociationPropertyMetadata:
+      RegionId: '${RegionId}'
+      Visible:
+        Condition:
+          Fn::And:
+            - Fn::Not:
+                Fn::Equals:
+                  - ${CsOptions}
+                  - ExistCs
+            - Fn::Equals:
+                - ExistingVPC
+                - ${VpcOption}
+  VSwitchId:
+    Type: String
+    Label:
+      en: VSwitch ID
+      zh-cn: 交换机实例ID
+    Description:
+      en: >-
+        Instance ID of existing business network switches, console-Virtual
+        Private Cloud-VSwitches under query
+      zh-cn: 现有业务网络交换机的实例ID
+    Required: true
+    Default: null
+    AssociationProperty: 'ALIYUN::ECS::VSwitch::VSwitchId'
+    AssociationPropertyMetadata:
+      VpcId: '${VpcId}'
+      ZoneId: '${ZoneId}'
+      Visible:
+        Condition:
+          Fn::And:
+            - Fn::Not:
+                Fn::Equals:
+                  - ${CsOptions}
+                  - ExistCs
+            - Fn::Equals:
+                - ExistingVPC
+                - ${VpcOption}
   VpcCidrBlock:
     Type: String
     Label:
       en: VPC CIDR IPv4 Block
       zh-cn: 专有网络IPv4网段
     Description:
-      zh-cn: >-
-        VPC的ip地址段范围，<br>您可以使用以下的ip地址段或其子网:<br><font
-        color='green'>[10.0.0.0/8]</font><br><font
-        color='green'>[172.16.0.0/12]</font><br><font
-        color='green'>[192.168.0.0/16]</font>
-      en: >-
-        The ip address range of the VPC in the CidrBlock form; <br>You can use
-        the following ip address ranges and their subnets: <br><font
-        color='green'>[10.0.0.0/8]</font><br><font
-        color='green'>[172.16.0.0/12]</font><br><font
-        color='green'>[192.168.0.0/16]</font>
+      zh-cn: VPC的ip地址段范围，<br>您可以使用以下的ip地址段或其子网:<br><font color='green'>[10.0.0.0/8]</font><br><font color='green'>[172.16.0.0/12]</font><br><font color='green'>[192.168.0.0/16]</font>
+      en: 'The ip address range of the VPC in the CidrBlock form; <br>You can use the following ip address ranges and their subnets: <br><font color=''green''>[10.0.0.0/8]</font><br><font color=''green''>[172.16.0.0/12]</font><br><font color=''green''>[192.168.0.0/16]</font>'
     Default: 192.168.0.0/16
-    AssociationProperty: 'ALIYUN::VPC::VPC::CidrBlock'
+    Required: true
+    AssociationProperty: ALIYUN::VPC::VPC::CidrBlock
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          Fn::And:
+            - Fn::Not:
+                Fn::Equals:
+                  - ${CsOptions}
+                  - ExistCs
+            - Fn::Equals:
+                - NewVPC
+                - ${VpcOption}
   VSwitchCidrBlock:
     Type: String
     Label:
@@ -98,31 +233,41 @@ Parameters:
     Description:
       zh-cn: 必须属于VPC的子网段。
       en: Must belong to the subnet segment of VPC.
-    Default: 192.168.1.0/24
-    AssociationProperty: 'ALIYUN::VPC::VSwitch::CidrBlock'
+    Default: 192.168.0.0/24
+    Required: true
+    AssociationProperty: ALIYUN::VPC::VSwitch::CidrBlock
     AssociationPropertyMetadata:
       VpcCidrBlock: VpcCidrBlock
+      Visible:
+        Condition:
+          Fn::And:
+            - Fn::Not:
+                Fn::Equals:
+                  - ${CsOptions}
+                  - ExistCs
+            - Fn::Equals:
+                - NewVPC
+                - ${VpcOption}
   LoginPassword:
     NoEcho: true
     Type: String
     Description:
-      en: >-
-        Server login password, Length 8-30, must contain three(Capital letters,
-        lowercase letters, numbers, ()`~!@#$%^&*_-+=|{}[]:;<>,.?/ Special symbol
-        in)
-      zh-cn: >-
-        服务器登录密码,长度8-30，必须包含三项（大写字母、小写字母、数字、 ()`~!@#$%^&*_-+=|{}[]:;<>,.?/
-        中的特殊符号）
+      en: Server login password, Length 8-30, must contain three(Capital letters, lowercase letters, numbers, ()`~!@#$%^&*_-+=|{}[]:;<>,.?/ Special symbol in)
+      zh-cn: 服务器登录密码,长度8-30，必须包含三项（大写字母、小写字母、数字、 ()`~!@#$%^&*_-+=|{}[]:;<>,.?/ 中的特殊符号）
     Label:
       en: Instance Password
       zh-cn: 实例密码
     ConstraintDescription:
-      en: >-
-        Length 8-30, must contain three(Capital letters, lowercase letters,
-        numbers, ()`~!@#$%^&*_-+=|{}[]:;<>,.?/ Special symbol in)
-      zh-cn: '长度8-30，必须包含三项（大写字母、小写字母、数字、 ()`~!@#$%^&*_-+=|{}[]:;<>,.?/ 中的特殊符号）'
-    AssociationProperty: 'ALIYUN::ECS::Instance::Password'
-    AllowedPattern: '^[a-zA-Z0-9-\(\)\`\~\!\@\#\$\%\^\&\*\_\-\+\=\|\{\}\[\]\:\;\<\>\,\.\?\/]*$'
+      en: Length 8-30, must contain three(Capital letters, lowercase letters, numbers, ()`~!@#$%^&*_-+=|{}[]:;<>,.?/ Special symbol in)
+      zh-cn: 长度8-30，必须包含三项（大写字母、小写字母、数字、 ()`~!@#$%^&*_-+=|{}[]:;<>,.?/ 中的特殊符号）
+    AssociationProperty: ALIYUN::ECS::Instance::Password
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          Fn::Equals:
+            - ${CsOptions}
+            - NewAck
+    AllowedPattern: ^[a-zA-Z0-9-\(\)\`\~\!\@\#\$\%\^\&\*\_\-\+\=\|\{\}\[\]\:\;\<\>\,\.\?\/]*$
     MinLength: 8
     MaxLength: 30
     Default: computenest*12345
@@ -131,23 +276,49 @@ Parameters:
     Label:
       en: Worker Nodes Types
       zh-cn: Worker节点规格
-    AssociationProperty: 'ALIYUN::ECS::Instance::InstanceType'
+    Default: null
+    Required: true
+    AssociationProperty: ALIYUN::ECS::Instance::InstanceType
     AssociationPropertyMetadata:
-      ZoneId: '${ZoneId}'
-    Default: ecs.g6.large
+      ZoneId: ${ZoneId}
+      CreateACKClusterParams:
+        NetworkPlugin: ${AckNetworkPlugin}
+      Visible:
+        Condition:
+          Fn::Equals:
+            - ${CsOptions}
+            - NewAck
+  WorkerInstanceCount:
+    Default: 3
+    Type: Number
+    Label:
+      zh-cn: 实例节点数
+      en: The count for cpu instance.
+    MinValue: 1
+    MaxValue: 5000
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          Fn::Equals:
+            - ${CsOptions}
+            - NewAck
   WorkerSystemDiskCategory:
     Type: String
-    AllowedValues:
-      - cloud_efficiency
-      - cloud_ssd
-      - cloud_essd
+    Default: null
+    Required: true
+    AssociationProperty: ALIYUN::ECS::Disk::SystemDiskCategory
     AssociationPropertyMetadata:
-      LocaleKey: DiskCategory
-      InstanceType: '${WorkerInstanceType}'
+      RegionId: ${RegionId}
+      ZoneId: ${ZoneId}
+      InstanceType: ${WorkerInstanceType}
+      Visible:
+        Condition:
+          Fn::Equals:
+            - ${CsOptions}
+            - NewAck
     Label:
       en: Worker System Disk Category
       zh-cn: Worker 系统盘磁盘类型
-    Default: cloud_essd
   WorkerSystemDiskSize:
     Type: Number
     Label:
@@ -155,234 +326,208 @@ Parameters:
       zh-cn: Worker节点系统盘大小(GB)
     MinValue: 1
     Default: 120
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          Fn::Equals:
+            - ${CsOptions}
+            - NewAck
+  AckNetworkPlugin:
+    Type: String
+    Label:
+      en: ack plugin network
+      zh-cn: ack网络插件
+    AllowedValues:
+      - flannel
+      - terway-eniip
+    AssociationPropertyMetadata:
+      ValueLabelMapping:
+        flannel: flannel
+        terway-eniip : terway
+      Visible:
+        Condition:
+          Fn::Equals:
+            - ${CsOptions}
+            - NewAck
+    Default: flannel
   PodCidr:
     Type: String
     Description:
-      zh-cn: >-
-        请填写有效的私有网段，即以下网段及其子网：10.0.0.0/8，172.16-31.0.0/12-16，192.168.0.0/16<br>不能与
-        VPC 及 VPC 内已有 Kubernetes 集群使用的网段重复。<font
-        color='blue'><b>创建成功后不能修改</b></font>
-      en: >-
-        Please fill in a valid private segment, i.e. the following segments and
-        their subnets: 10.0.0.0/8, 172.16-31.0.0/12-16, 192.168.0.0/16<br> which
-        cannot duplicate the network segments already used by clusters in VPC
-        and VPC Kunetberes. <font color='blue'><b>Cannot be modified after
-        successful creation</b></font>
+      zh-cn: 请填写有效的私有网段，即以下网段及其子网：10.0.0.0/8，172.16-31.0.0/12-16，192.168.0.0/16<br>不能与 VPC 及 VPC 内已有 Kubernetes 集群使用的网段重复。<font color='blue'><b>创建成功后不能修改</b></font>
+      en: 'Please fill in a valid private segment, i.e. the following segments and their subnets: 10.0.0.0/8, 172.16-31.0.0/12-16, 192.168.0.0/16<br> which cannot duplicate the network segments already used by clusters in VPC and VPC Kunetberes. <font color=''blue''><b>Cannot be modified after successful creation</b></font>'
     Label:
       zh-cn: Pod 网络 CIDR
       en: Pod Network CIDR
-    AssociationProperty: 'ALIYUN::CS::ManagedKubernetesCluster::PodCidr'
+    AssociationProperty: ALIYUN::CS::ManagedKubernetesCluster::PodCidr
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          Fn::And:
+            - Fn::Equals:
+                - ${CsOptions}
+                - NewAck
+            - Fn::Equals:
+                - ${AckNetworkPlugin}
+                - flannel
     Default: 10.0.0.0/16
   ServiceCidr:
     Type: String
     Description:
-      zh-cn: >-
-        可选范围：10.0.0.0/16-24，172.16-31.0.0/16-24，192.168.0.0/16-24<br>不能与 VPC 及
-        VPC 内已有 Kubernetes 集群使用的网段重复。<font color='blue'><b>创建成功后不能修改</b></font>
-      en: >-
-        Optional range: 10.0.0.0/16-24, 172.16-31.0.0/16-24,
-        192.168.0.0/16-24<br> cannot duplicate segments already used by existing
-        Kubernetes clusters in VPC and VPC.<font color='blue'><b>Cannot be
-        modified after successful creation</b></font>
+      zh-cn: 可选范围：10.0.0.0/16-24，172.16-31.0.0/16-24，192.168.0.0/16-24<br>不能与 VPC 及 VPC 内已有 Kubernetes 集群使用的网段重复。<font color='blue'><b>创建成功后不能修改</b></font>
+      en: 'Optional range: 10.0.0.0/16-24, 172.16-31.0.0/16-24, 192.168.0.0/16-24<br> cannot duplicate segments already used by existing Kubernetes clusters in VPC and VPC.<font color=''blue''><b>Cannot be modified after successful creation</b></font>'
     Label:
       zh-cn: Service CIDR
       en: Service CIDR
-    AssociationProperty: 'ALIYUN::CS::ManagedKubernetesCluster::ServiceCidr'
+    AssociationProperty: ALIYUN::CS::ManagedKubernetesCluster::ServiceCidr
+    AssociationPropertyMetadata:
+      VpcId: ${VpcId}
+      RegionId: ${RegionId}
+      ClusterType: ManagedKubernetes
+      NodeCidrMask: 26
+      Addons:
+        - name: flannel
+      ContainerCidr: ${PodCidr}
+      Visible:
+        Condition:
+          Fn::Not:
+            Fn::Equals:
+              - ${CsOptions}
+              - ExistCs
     Default: 172.16.0.0/16
-  LoadBalancerSpec:
-    Type: String
-    AssociationProperty: ALIYUN::SLB::Instance::InstanceType
-    Label:
-      en: Specifications
-      zh-cn: 规格
-    Default: slb.s1.small
+Conditions:
+  CreateClusterCondition:
+    Fn::Or:
+      - Fn::Equals:
+          - NewAck
+          - Ref: CsOptions
+      - Fn::Equals:
+          - NewAcs
+          - Ref: CsOptions
+  FlannelPluginCondition:
+    Fn::Equals:
+      - Ref: AckNetworkPlugin
+      - flannel
 Resources:
-  EcsVpc:
-    Type: 'ALIYUN::ECS::VPC'
+  VpcModule:
+    Condition: CreateClusterCondition
+    Type: MODULE::ACS::ComputeNest::VpcAndVSwitch
+    Version: default
     Properties:
-      VpcName:
-        Ref: 'ALIYUN::StackName'
-      CidrBlock:
-        Ref: VpcCidrBlock
-  EcsVSwitch:
-    Type: 'ALIYUN::ECS::VSwitch'
-    Properties:
-      VSwitchName:
-        Ref: 'ALIYUN::StackName'
-      VpcId:
-        Ref: EcsVpc
       ZoneId:
         Ref: ZoneId
-      CidrBlock:
-        Ref: VSwitchCidrBlock
-  # 新建负载均衡
-  Slb:
-    Type: ALIYUN::SLB::LoadBalancer
-    Properties:
-      LoadBalancerName:
-        Ref: ALIYUN::StackName
-      PayType:
-        Ref: PayType
-      PricingCycle:
-        Ref: PayPeriodUnit
-      Duration:
-        Ref: PayPeriod
+      VpcOption:
+        Ref: VpcOption
       VpcId:
-        Ref: EcsVpc
+        Ref: VpcId
       VSwitchId:
-        Ref: EcsVSwitch
-      LoadBalancerSpec:
-        Ref: LoadBalancerSpec
-      AddressType: intranet
-  # 新建eip
-  EipSlbAddress:
-    Type: ALIYUN::VPC::EIP
+        Ref: VSwitchId
+      VSwitchCidrBlock:
+        Ref: VSwitchCidrBlock
+      VpcCidrBlock:
+        Ref: VpcCidrBlock
+  AckOrAcsClusterModule:
+    DependsOn:
+      - VpcModule
+    Type: MODULE::ACS::ComputeNest::AckOrAcsCluster
+    Version: default
     Properties:
-      Name:
-        Ref: ALIYUN::StackName
-      InternetChargeType: PayByTraffic
-      Bandwidth: 100
-  # 绑定eip到负载均衡
-  EipSlbAddressAssociation:
-    Type: ALIYUN::VPC::EIPAssociation
-    Properties:
-      InstanceId:
-        Ref: Slb
-      AllocationId:
-        Ref: EipSlbAddress
-  EcsSecurityGroup:
-    Type: 'ALIYUN::ECS::SecurityGroup'
-    Properties:
-      SecurityGroupName:
-        Ref: 'ALIYUN::StackName'
+      CsOptions:
+        Ref: CsOptions
+      ClusterId:
+        Ref: ClusterId
       VpcId:
-        Ref: EcsVpc
-      SecurityGroupEgress:
-        - PortRange: '-1/-1'
-          Priority: 1
-          IpProtocol: all
-          DestCidrIp: 0.0.0.0/0
-          NicType: intranet
-      SecurityGroupIngress:
-        - PortRange: '-1/-1'
-          Priority: 1
-          IpProtocol: all
-          SourceCidrIp:
-            Ref: PodCidr
-          Description: pod网络访问开放
-          NicType: intranet
-        - PortRange: '-1/-1'
-          Priority: 1
-          IpProtocol: all
-          SourceCidrIp:
-            Ref: VpcCidrBlock
-          Description: vpc网络访问开放
-          NicType: intranet
-        - PortRange: '-1/-1'
-          Priority: 1
-          IpProtocol: icmp
-          SourceCidrIp: 0.0.0.0/0
-          Description: icmp协议端口放开
-          NicType: intranet
-  ManagedKubernetesCluster:
-    Type: 'ALIYUN::CS::ManagedKubernetesCluster'
-    Properties:
-      Name:
-        Ref: 'ALIYUN::StackName'
-      ChargeType:
-        Ref: PayType
-      Period:
-        Ref: PayPeriod
-      PeriodUnit:
-        Ref: PayPeriodUnit
-      VSwitchIds:
-        - Ref: EcsVSwitch
-      VpcId:
-        Ref: EcsVpc
-      WorkerInstanceTypes:
-        - Ref: WorkerInstanceType
-      NumOfNodes: 3
+        Fn::GetAtt:
+          - VpcModule
+          - VpcId
+      VSwitchId:
+        Fn::GetAtt:
+          - VpcModule
+          - VSwitchId
       ClusterSpec: ack.pro.small
-      ContainerCidr:
+      AckNetworkPlugin:
+        Fn::If:
+          - FlannelPluginCondition
+          - flannel
+          - terway
+      PodVSwitchId:
+        Fn::GetAtt:
+          - VpcModule
+          - VSwitchId
+      PodCidr:
         Ref: PodCidr
       ServiceCidr:
         Ref: ServiceCidr
-      ZoneIds:
-        - Ref: ZoneId
-      SecurityGroupId:
-        Ref: EcsSecurityGroup
+      ZoneId:
+        Ref: ZoneId
+      PayType:
+        Ref: PayType
+      PayPeriod:
+        Ref: PayPeriod
+      PayPeriodUnit:
+        Ref: PayPeriodUnit
+      WorkerInstanceCount:
+        Ref: WorkerInstanceCount
+      WorkerInstanceTypes:
+        - Ref: WorkerInstanceType
       WorkerSystemDiskCategory:
         Ref: WorkerSystemDiskCategory
       WorkerSystemDiskSize:
         Ref: WorkerSystemDiskSize
       LoginPassword:
         Ref: LoginPassword
-      SnatEntry: true
-      Addons:
-        - Name: flannel
-          Config: ''
   ClusterApplication:
+    DependsOn:
+      - AckOrAcsClusterModule
     Type: ALIYUN::CS::ClusterApplication
     Properties:
-      YamlContent:
-        Fn::Sub:
-          - |
-            apiVersion: v1
-            data:
-              .dockerconfigjson: {{computenest::acr::dockerconfigjson}}
-            kind: Secret
+      YamlContent: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: spring-boot
+          labels:
+            app: spring-boot
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: spring-boot
+          template:
             metadata:
-              name: docker-secret
-            type: kubernetes.io/dockerconfigjson
-            ---
-            apiVersion: apps/v1
-            kind: Deployment
-            metadata:
-              name: spring-boot
               labels:
                 app: spring-boot
             spec:
-              replicas: 1
-              selector:
-                matchLabels:
-                  app: spring-boot
-              template:
-                metadata:
-                  labels:
-                    app: spring-boot
-                spec:
-                  containers:
-                    - name: spring-boot
-                      image: {{ computenest::acrimage::springBootDemo }}
-                  imagePullSecrets:
-                    - name: docker-secret
-            ---
-            apiVersion: v1
-            kind: Service
-            metadata:
-              annotations:
-                service.beta.kubernetes.io/alibaba-cloud-loadbalancer-id: ${LoadBalancerId}
-                service.beta.kubernetes.io/alicloud-loadbalancer-force-override-listeners: "true"
-              labels:
-                app: spring-boot
-              name: spring-boot-svc
-            spec:
-              ports:
-              - port: 8080
-                protocol: TCP
-                targetPort: 8080
-              selector:
-                app: spring-boot
-              type: LoadBalancer
-          - LoadBalancerId:
-              Fn::GetAtt:
-                - Slb
-                - LoadBalancerId
+              containers:
+                - name: spring-boot
+                  image: {{ computenest::acrimage::springBootDemo }}
+        ---
+        apiVersion: v1
+        kind: Service
+        metadata:
+          labels:
+            app: spring-boot
+          name: spring-boot-svc
+        spec:
+          ports:
+          - port: 8080
+            protocol: TCP
+            targetPort: 8080
+          selector:
+            app: spring-boot
+          type: LoadBalancer
       ClusterId:
         Fn::GetAtt:
-          - ManagedKubernetesCluster
+          - AckOrAcsClusterModule
           - ClusterId
-      DefaultNamespace: default
+      DefaultNamespace:
+        Ref: 'ALIYUN::StackName'
+      WaitUntil:
+        - Kind: Service
+          Name: spring-boot-svc
+          JsonPath: $.status.loadBalancer.ingress[0].ip
+          Operator: NotEmpty
+          FirstMatch: true
+          Timeout: 300
 Outputs:
   # 将公网ip做为http返回的地址显示在控制台
   Endpoint:
@@ -391,14 +536,22 @@ Outputs:
       en: Public IP Addresses
     Value:
       Fn::Sub:
-        - http://${ServerAddress}:8080
+        - "http://${ServerAddress}:8080"
         - ServerAddress:
-            Fn::GetAtt:
-              - EipSlbAddress
-              - EipAddress
+            Fn::Select:
+              - 0
+              - Fn::GetAtt:
+                  - ClusterApplication
+                  - WaitUntilData
 Metadata:
-  'ALIYUN::ROS::Interface':
+  ALIYUN::ROS::Interface:
     ParameterGroups:
+      - Parameters:
+          - CsOptions
+          - ClusterId
+        Label:
+          en: Cs cluster option
+          zh-cn: 容器集群选项
       - Parameters:
           - PayType
           - PayPeriodUnit
@@ -407,24 +560,24 @@ Metadata:
           en: PayType Configuration
           zh-cn: 付费类型配置
       - Parameters:
-          - ZoneId
-          - VpcCidrBlock
-          - VSwitchCidrBlock
-          - LoginPassword
-        Label:
-          en: Basic Configuration
-          zh-cn: 基础配置
-      - Parameters:
           - WorkerInstanceType
+          - WorkerInstanceCount
           - WorkerSystemDiskCategory
           - WorkerSystemDiskSize
-          - ServiceCidr
+          - LoginPassword
+          - AckNetworkPlugin
           - PodCidr
+          - ServiceCidr
         Label:
           en: Kubernetes
           zh-cn: Kubernetes配置
       - Parameters:
-          - LoadBalancerSpec
+          - ZoneId
+          - VpcOption
+          - VpcId
+          - VSwitchId
+          - VpcCidrBlock
+          - VSwitchCidrBlock
         Label:
-          en: 负载均衡配置
-          zh-cn: 负载均衡配置
+          en: Basic Configuration
+          zh-cn: 基础配置
