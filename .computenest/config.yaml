@@ -7,7 +7,7 @@ Service:
     SupplierDeployMetadata:
       AcrImageArtifactRelation:
         '{{ computenest::acrimage::springBootDemo }}':
-          ArtifactId:
+          ArtifactId: artifact-58a1ffbe260e490dbc52
     TemplateConfigs:
       - Name: 容器集群部署yaml模版
         Url: 'ros_templates/template.yaml'
