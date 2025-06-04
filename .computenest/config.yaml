@@ -7,7 +7,8 @@ Service:
     SupplierDeployMetadata:
       AcrImageArtifactRelation:
         '{{ computenest::acrimage::springBootDemo }}':
-          ArtifactId: artifact-58a1ffbe260e490dbc52
+          ArtifactId: ${Artifact.Artifact_1.ArtifactId}
+          ArtifactVersion: ${Artifact.Artifact_1.ArtifactVersion}
     TemplateConfigs:
       - Name: 容器集群部署yaml模版
         Url: 'ros_templates/template.yaml'
@@ -43,6 +44,15 @@ Service:
     Name: SpringBoot服务示例(容器集群+yaml版本)
   ShareType: Public
   ApprovalType: Manual
+Artifact:
+  Artifact_1:
+    ArtifactType: AcrImage
+    ArtifactName: spring-boot-demo
+    Description: spring-boot-demo
+    ArtifactProperty:
+      RepoName: ${AcrImageBuilder.AcrImage_1.RepoName}
+      Tag: ${AcrImageBuilder.AcrImage_1.Tag}
+      RepoType: Public
 AcrImageBuilder:
   AcrImage_1:
     DockerFilePath: '.computenest/resources/artifact_resources/acr_image/Dockerfile'
