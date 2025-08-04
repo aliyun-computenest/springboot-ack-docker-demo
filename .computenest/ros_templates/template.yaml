@@ -364,6 +364,14 @@ Parameters:
               - ${CsOptions}
               - ExistCs
     Default: 172.16.0.0/16
+  KubernetesVersion:
+    Type: String
+    Label:
+      zh-cn: Kubernetes版本
+      en: Kubernetes Version
+    AssociationProperty: ALIYUN::CS::Cluster::KubernetesVersion
+    AssociationPropertyMetadata:
+      AutoSelectFirst: true
 Conditions:
   CreateClusterCondition:
     Fn::Or:
@@ -437,6 +445,8 @@ Resources:
         Ref: PayPeriodUnit
       WorkerInstanceCount:
         Ref: WorkerInstanceCount
+      KubernetesVersion:
+        Ref: KubernetesVersion
       WorkerInstanceTypes:
         - Ref: WorkerInstanceType
       WorkerSystemDiskCategory: cloud_essd
@@ -530,6 +540,7 @@ Metadata:
       - Parameters:
           - WorkerInstanceType
           - WorkerInstanceCount
+          - KubernetesVersion
           - LoginPassword
           - AckNetworkPlugin
           - PodCidr
