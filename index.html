@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="计算巢是阿里云开放给企业应用服务商的服务管理平台。服务商能够在计算巢上发布私有化部署服务，为其客户提供云上软件一键部署的能力；同时也支持全托管模式的服务，赋能服务商托管其客户资源。">
+  <title>服务模板说明文档 - Aliyun 计算巢 x springboot-ack-docker-demo</title>
+
+  <link rel="shortcut icon" href="img/favicon.ico">
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
+  <link rel="stylesheet" href="css/theme.css">
+  
+
+  
+
+  
+  
+
+  
+    <script src="search/main.js"></script>
+  
+
+  
+
+  <script src="js/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="nav-inner">
+        <div class="logo">
+          <img src="./img/logo-2x.png">
+        </div>
+        <div class="nav-list">
+          <ul>
+          
+              <li><a href="#_1">服务模板说明文档</a></li>
+              
+                  <li><a href="#_2">服务说明</a></li>
+                  
+              
+                  <li><a href="#_3">服务架构</a></li>
+                  
+              
+                  <li><a href="#_4">服务构建计费说明</a></li>
+                  
+              
+                  <li><a href="#_5">服务实例部署流程</a></li>
+                  
+                      <li class="li-h3"><a href="#_6">部署步骤</a></li>
+                  
+              
+                  <li><a href="#_7">服务详细说明</a></li>
+                  
+              
+                  <li><a href="#_8">其他</a></li>
+                  
+              
+          
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="content theme-github">
+      
+      <div class="content-inner">        
+        
+        <h1 id="_1">服务模板说明文档</h1>
+<h2 id="_2">服务说明</h2>
+<p>本文介绍SpringBoot服务ack+docker版快速上手流程，本示例对应的Git仓库地址：<a href="https://github.com/aliyun-computenest/springboot-ack-docker-demo">springboot-ack-docker-demo</a>。</p>
+<p>本示例会自动的构建计算巢服务，具体的服务构建流程为:</p>
+<ol>
+<li>构建并上传docker镜像，创建计算巢容器镜像部署物</li>
+<li>创建计算巢服务并关联容器镜像部署物</li>
+</ol>
+<p>创建过程大约持续1分钟，当服务变成待提交后构建成功。</p>
+<h2 id="_3">服务架构</h2>
+<p>本部署架构为ack集群部署，将docker镜像以service的方式部署到ack集群中，通过service绑定的loadBalancer的公网ip进行访问，在本例中，service提供的对外端口为8080，和容器对外提供的端口相同。</p>
+<p><img alt="img_6.png" src="architecture.png" /></p>
+<h2 id="_4">服务构建计费说明</h2>
+<p>测试本服务构建无需任何费用，创建服务实例涉及的费用参考服务实例计费说明。</p>
+<h2 id="_5">服务实例部署流程</h2>
+<h3 id="_6">部署步骤</h3>
+<ol>
+<li>部署链接
+<img alt="img.png" src="img_6.png" /></li>
+<li>单击部署链接，进入服务实例部署界面，根据界面提示，填写参数完成部署。
+<img alt="img_1.png" src="img_1.png" /></li>
+<li>参数填写完成后可以看到对应询价明细，确认参数后点击<strong>下一步：确认订单</strong>。
+<img alt="img_2.png" src="img_2.png" /></li>
+<li>确认订单完成后同意服务协议并点击<strong>立即创建</strong>，随后进入部署阶段。
+<img alt="img_3.png" src="img_3.png" /></li>
+<li>等待部署完成后就可以开始使用服务，进入服务实例详情点击visitUrl。
+<img alt="img_4.png" src="img_4.png" /></li>
+<li>部署结果
+<img alt="img_5.png" src="img_5.png" /></li>
+</ol>
+<h2 id="_7">服务详细说明</h2>
+<p>本文通过将<a href="https://atomgit.com/flow-example/spring-boot">spring-boot</a>构建后，将deploy.sh和application.jar打包成package.tgz,对其中的application.jar打包成docker镜像,
+通过计算巢部署物上传为容器镜像部署物，在模版中创建ACK集群，将容器镜像部署物部署到ACK集群上。
+templates/template.yaml主要由三部分组成：Parameters、Resources和Outputs</p>
+<p>1.Parameters，定义需要用户填写的参数，包括付费类型，ACK实例规格和实例密码可用区等参数。
+2.Resources定义需要开的资源，包括新开的vpc、loadBalancer、ack集群。ALIYUN::CS::ClusterApplication资源类型会将镜像按yaml文件部署到ACK集群中，其中{{ computenest::acr::dockerconfigjson }}是下载docker所需secret的占位符，计算巢服务会在部署时替换为对应的下载秘钥。{{ computenest::acrimage::demo }} 是容器镜像仓库的占位符，计算巢服务会替换成对应的镜像仓库地址。
+3.Outputs定义需要最终在计算巢概览页中对用户展示的输出，展示SpringBoot的访问地址，负载均衡地址加服务端口。</p>
+<h2 id="_8">其他</h2>
+<p><a href="https://atomgit.com/flow-example/spring-boot">实例代码源地址</a></p>
+<p><a href="https://help.aliyun.com/document_detail/153848.html">软件包package.tgz构建流程参考</a></p>
+        
+      </div>
+
+      <div class="copyrights">© 2009-2022 Aliyun.com 版权所有</div>
+    </div>
+  </div>
+  
+  <!--
+  MkDocs version      : 1.6.1
+  Docs Build Date UTC : 2025-10-21 06:56:15.472130+00:00
+  -->
+</body>
+</html>
